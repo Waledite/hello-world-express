@@ -11,6 +11,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Make it seem like index.html is in root by redirecting root requests
+app.get('^/$|/index(.html)?', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 app.get('/api/text', (req, res) => {
   res.type('text').send('Hello World');
 });
