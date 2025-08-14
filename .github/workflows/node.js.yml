@@ -1,0 +1,49 @@
+name: Node.js CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+      # Continue even if one Node version fails
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: |
+        # Install exact versions from lockfile if exists
+        if [ -f package-lock.json ]; then
+          npm ci
+        else
+          npm install
+        fi
+        
+    - name: Run tests
+      run: npm test
+      
+    - name: Verify server starts
+      run: |
+        # Start server in background
+        npm start &
+        # Wait for server to start
+        sleep 5
+        # Check root endpoint
+        curl -s http://localhost:3000 | grep "Hello World"
+        # Check API endpoints
+        curl -s http://localhost:3000/api/text | grep "Hello World"
+        curl -s http://localhost:3000/api/hello | grep '"message":"Hello World"'
