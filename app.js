@@ -1,28 +1,32 @@
 const express = require('express');
 const path = require('path');
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-// Serve static files from the public directory
+// Middleware
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Existing route (now at /api/text)
-app.get('/api/text', (req, res) => {
-  res.send('Hello World');
-});
-
-// New JSON API endpoint
-app.get('/api/hello', (req, res) => {
-  res.json({ message: 'Hello World' });
-});
-
-// Serve index.html for the root route
+// Routes
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-const server = app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.get('/api/text', (req, res) => {
+  res.type('text').send('Hello World');
 });
 
-module.exports = { app, server };
+app.get('/api/hello', (req, res) => {
+  res.json({ message: 'Hello World' });
+});
+
+// Export the app for testing
+module.exports = app;
+
+// Only start server when run directly (not in tests)
+if (require.main === module) {
+  const port = process.env.PORT || 3000;
+  const server = app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+  module.exports.server = server;
+}
