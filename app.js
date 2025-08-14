@@ -19,14 +19,20 @@ app.get('/api/hello', (req, res) => {
   res.json({ message: 'Hello World' });
 });
 
-// Export the app for testing
+// Export the raw app for testing
 module.exports = app;
 
-// Only start server when run directly (not in tests)
+// Server start logic - only when run directly
 if (require.main === module) {
   const port = process.env.PORT || 3000;
   const server = app.listen(port, () => {
     console.log(`Server running on port ${port}`);
   });
-  module.exports.server = server;
+  
+  // Handle graceful shutdown
+  process.on('SIGTERM', () => {
+    server.close(() => {
+      console.log('Server closed');
+    });
+  });
 }

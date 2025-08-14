@@ -1,38 +1,34 @@
 const request = require('supertest');
 const app = require('../app');
 
-// Add server closing logic
-let server;
+describe('Express Server', () => {
+  let server;
 
-beforeAll(() => {
-  server = app.listen(0); // Start server on random port for tests
-});
+  beforeAll((done) => {
+    server = app.listen(0, done); // Start on random port
+  });
 
-afterAll((done) => {
-  server.close(done); // Close server after tests
-});
+  afterAll((done) => {
+    server.close(done); // Proper cleanup
+  });
 
-describe('GET /', () => {
-  it('should serve the index.html file', async () => {
-    const response = await request(server).get('/'); // Use server instead of app
-    expect(response.statusCode).toBe(200);
+  test('GET / serves index.html', async () => {
+    const response = await request(server).get('/');
+    expect(response.status).toBe(200);
     expect(response.text).toContain('<title>Hello World Express</title>');
   });
-});
 
-// Update other tests to use server instead of app
-describe('GET /api/text', () => {
-  it('should return "Hello World" as text', async () => {
-    const response = await request(server).get('/api/text'); // Changed to server
-    expect(response.statusCode).toBe(200);
+  test('GET /api/text returns plain text', async () => {
+    const response = await request(server).get('/api/text');
+    expect(response.status).toBe(200);
     expect(response.text).toBe('Hello World');
+    expect(response.headers['content-type']).toMatch(/text/);
   });
-});
 
-describe('GET /api/hello', () => {
-  it('should return "Hello World" as JSON', async () => {
-    const response = await request(server).get('/api/hello'); // Changed to server
-    expect(response.statusCode).toBe(200);
+  test('GET /api/hello returns JSON', async () => {
+    const response = await request(server).get('/api/hello');
+    expect(response.status).toBe(200);
     expect(response.body).toEqual({ message: 'Hello World' });
+    expect(response.headers['content-type']).toMatch(/json/);
   });
 });
