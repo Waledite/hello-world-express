@@ -18,6 +18,8 @@
     "test": "test"
   },
   "scripts": {
+   "start": "node app.js",
+   "build": "echo 'Build complete'", 
    "test": "jest --detectOpenHandles --forceExit",
    "test:watch": "jest --watch"
   },
